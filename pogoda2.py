@@ -1,6 +1,14 @@
 import requests
 
 
+def intro(func):
+    def wrapper(*args, **kwargs):
+        print("Щас, погоди...")
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
 class Weather:
     def __init__(self, latitude, longitude):
         self.lat = latitude
@@ -9,12 +17,14 @@ class Weather:
         self.temperature = self.data["current_weather"]["temperature"]
         self.city = self.fetch_city()
 
+    @intro
     def get_weather(self):
         response = requests.get(
             f"https://api.open-meteo.com/v1/forecast?latitude={self.lat}&longitude={self.lon}&current_weather=true&timezone=auto"
         )
         return response.json()
 
+    @intro
     def fetch_city(self):
         url = f"https://nominatim.openstreetmap.org/reverse?lat={self.lat}&lon={self.lon}&format=json"
         response = requests.get(url, headers={"User-Agent": "MyWeatherApp/1.0"})
@@ -30,6 +40,7 @@ class Weather:
         else:
             return "Неизвестное место"
 
+    @intro
     def warm_or_cold(self):
         if self.temperature > 20:
             return "Тепло"
@@ -44,3 +55,7 @@ weather = Weather(lat, lon)
 print(f"Город: {weather.city}")
 print(f"Температура: {weather.temperature}")
 print(f"Сегодня: {weather.warm_or_cold()}")
+
+print("Список ключей:")
+for key in weather.data:
+    print(key)
